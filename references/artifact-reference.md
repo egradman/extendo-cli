@@ -196,6 +196,59 @@ The `ranking` array is ordered from highest to lowest priority (item IDs).
 
 ---
 
+### triage
+
+**When to use:** Categorize items into named buckets. Bug severity triage, task categorization, priority buckets, kanban-style sorting.
+
+**Required flags:** `--type triage`, `--title`, `--prompt`, at least one `--heading`, at least one `--item`
+
+**Heading format:** `--heading id:label` (repeatable)
+
+**Item format:** `--item heading_id/id:label[:description]` (repeatable). The prefix before `/` assigns the item to its initial bucket.
+
+**Example:**
+```bash
+setae artifact create decisions bug-triage \
+  --type triage \
+  --title "Triage bugs by severity" \
+  --prompt "Categorize these bugs by severity" \
+  --heading "critical:Critical" \
+  --heading "major:Major" \
+  --heading "minor:Minor" \
+  --item "critical/bug1:Auth crash:Users see white screen" \
+  --item "major/bug2:Slow query" \
+  --item "minor/bug3:Typo in footer" \
+  --wait --json
+```
+
+**Result shape:**
+```json
+{
+  "payload": {
+    "type": "triage",
+    "prompt": "Categorize these bugs by severity",
+    "headings": [
+      { "id": "critical", "label": "Critical" },
+      { "id": "major", "label": "Major" },
+      { "id": "minor", "label": "Minor" }
+    ],
+    "items": [
+      { "id": "bug1", "label": "Auth crash", "description": "Users see white screen" },
+      { "id": "bug2", "label": "Slow query" },
+      { "id": "bug3", "label": "Typo in footer" }
+    ],
+    "buckets": { "critical": ["bug1"], "major": ["bug2"], "minor": ["bug3"] },
+    "triage": { "critical": ["bug1", "bug2"], "major": [], "minor": ["bug3"] }
+  }
+}
+```
+
+- `buckets` is the initial assignment (the "question")
+- `triage` is the user's result (the "answer"), same shape as `buckets`
+- On the device: iPhone shows collapsible sections with context menu to move between buckets; iPad shows a kanban board with drag-and-drop
+
+---
+
 ### document_review
 
 **When to use:** A markdown document the user reviews with per-paragraph annotations. RFCs, proposals, generated reports, contracts.
@@ -383,6 +436,17 @@ echo "$RESULT" | jq '.payload.items[] | select(.decision == "rejected") | {id, c
 RESULT=$(setae artifact get decisions priorities --json)
 echo "$RESULT" | jq -r '.payload.ranking[]'          # IDs in priority order
 echo "$RESULT" | jq -r '.payload.ranking[0]'         # highest priority item
+```
+
+### Triage
+```bash
+RESULT=$(setae artifact get decisions bug-triage --json)
+# Get the user's triage result (bucket assignments)
+echo "$RESULT" | jq '.payload.triage'
+# Items in a specific bucket
+echo "$RESULT" | jq -r '.payload.triage.critical[]'
+# Count items per bucket
+echo "$RESULT" | jq '.payload.triage | to_entries[] | {key, count: (.value | length)}'
 ```
 
 ### Document Review

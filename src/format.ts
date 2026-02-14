@@ -154,6 +154,26 @@ function formatRanking(artifact: Artifact): string {
   return `${artifact.title} \u2014 ${items.length} items, awaiting ranking`;
 }
 
+function formatTriage(artifact: Artifact): string {
+  const payload = artifact.payload;
+  const headings = payload.headings ?? [];
+  const items = payload.items ?? [];
+  const arrangement = payload.triage ?? payload.buckets ?? {};
+
+  const lines = [`${artifact.title} \u2014 Triage:`, ""];
+  for (const heading of headings) {
+    const itemIds: string[] = arrangement[heading.id] ?? [];
+    lines.push(`  [${heading.label}] (${itemIds.length} items)`);
+    for (const itemId of itemIds) {
+      const item = items.find((it: any) => it.id === itemId);
+      const label = item ? item.label : itemId;
+      const desc = item?.description ? ` \u2014 ${item.description}` : "";
+      lines.push(`    \u2022 ${label}${desc}`);
+    }
+  }
+  return lines.join("\n");
+}
+
 function formatDocumentReview(artifact: Artifact): string {
   const payload = artifact.payload;
   const annotations = payload.annotations ?? [];
@@ -194,6 +214,9 @@ export function formatArtifact(
       break;
     case "ranking":
       detail = formatRanking(artifact);
+      break;
+    case "triage":
+      detail = formatTriage(artifact);
       break;
     case "document_review":
       detail = formatDocumentReview(artifact);

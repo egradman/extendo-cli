@@ -210,6 +210,17 @@ function parseItemSpec(spec: string): { id: string; label: string; description?:
   return { id, label, description };
 }
 
+function parseTriageItemSpec(spec: string): { headingId: string; id: string; label: string; description?: string } {
+  const slashIdx = spec.indexOf("/");
+  if (slashIdx < 0) {
+    throw new Error(`Invalid triage item format "${spec}". Expected heading_id/id:label[:description]`);
+  }
+  const headingId = spec.slice(0, slashIdx);
+  const rest = spec.slice(slashIdx + 1);
+  const parsed = parseItemSpec(rest);
+  return { headingId, ...parsed };
+}
+
 function parseConversationLink(value: string): { category: string; name: string } {
   const idx = value.indexOf(":");
   if (idx < 0) {
@@ -251,6 +262,26 @@ function buildPayload(opts: Record<string, any>): Record<string, any> {
           return { id: parsed.id, label: parsed.label, description: parsed.description };
         }),
       };
+    case "triage": {
+      const headings = (opts.heading ?? []).map((spec: string) => {
+        const parsed = parseItemSpec(spec);
+        return { id: parsed.id, label: parsed.label };
+      });
+      const headingIds = new Set(headings.map((h: { id: string }) => h.id));
+      const buckets: Record<string, string[]> = {};
+      for (const h of headings) {
+        buckets[h.id] = [];
+      }
+      const items = (opts.item ?? []).map((spec: string) => {
+        const parsed = parseTriageItemSpec(spec);
+        if (!headingIds.has(parsed.headingId)) {
+          throw new Error(`Unknown heading "${parsed.headingId}" in item "${spec}". Valid headings: ${[...headingIds].join(", ")}`);
+        }
+        buckets[parsed.headingId].push(parsed.id);
+        return { id: parsed.id, label: parsed.label, description: parsed.description };
+      });
+      return { type: opts.type, prompt, headings, items, buckets };
+    }
     case "document_review": {
       let markdown = opts.document ?? "";
       if (opts.documentFile) {
@@ -323,12 +354,13 @@ const artifact = program
 artifact
   .command("create <category> <name>")
   .description("create a new artifact")
-  .requiredOption("--type <type>", "artifact type (multiple_choice, yes_no, checklist, ranking, document_review)")
+  .requiredOption("--type <type>", "artifact type (multiple_choice, yes_no, checklist, ranking, document_review, triage)")
   .requiredOption("--title <title>", "artifact title")
   .option("--prompt <prompt>", "question text")
   .option("--description <text>", "longer description/context")
   .option("--option <value>", "option as id:label[:desc] (repeatable, for multiple_choice)", collect, [])
-  .option("--item <value>", "item as id:label[:desc] (repeatable, for checklist/ranking)", collect, [])
+  .option("--item <value>", "item as id:label[:desc] (repeatable, for checklist/ranking/triage)", collect, [])
+  .option("--heading <value>", "heading as id:label (repeatable, for triage)", collect, [])
   .option("--multi-select", "allow multiple selections (multiple_choice)")
   .option("--document-file <path>", "load markdown from file (document_review)")
   .option("--document <markdown>", "inline markdown (document_review)")
