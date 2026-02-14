@@ -1,7 +1,9 @@
 ---
-name: setae
-description: This skill should be used when the agent needs to communicate with a human user via Setae — sending messages, waiting for replies, creating structured decisions (artifacts), or managing backend configurations. Triggers on tasks involving user communication, approvals, reviews, rankings, checklists, or document feedback through the Setae CLI.
-version: 0.1.0
+name: setae-cli
+description: Communicate with a human user via Setae — send messages, wait for replies, create structured decisions (yes/no, multiple choice, checklist, ranking, document review). The user sees rich UI on their phone and responds. Triggers on "send message to user", "ask user", "get approval", "create decision", "artifact", "setae", or any task requiring human input via mobile push notifications.
+metadata:
+  author: egradman
+  version: "0.1.0"
 ---
 
 # Setae CLI — Agent Skill
@@ -45,11 +47,7 @@ setae threads [--json]
 
 Use artifacts when you need a **structured response** — not free-form text. Artifacts present purpose-built UI on the user's device (buttons, checklists, drag-to-reorder lists, annotatable documents). The user responds through that UI, and you get structured JSON back.
 
-For the full artifact reference including all decision types, workflow patterns, result shapes, and jq parsing snippets, read the reference doc:
-
-```
-${CLAUDE_PLUGIN_ROOT}/skills/setae/references/artifact-reference.md
-```
+For the full artifact reference including all decision types, workflow patterns, result shapes, and jq parsing snippets, read the reference doc: [references/artifact-reference.md](references/artifact-reference.md)
 
 ### Quick Reference
 
