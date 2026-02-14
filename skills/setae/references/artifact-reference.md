@@ -41,7 +41,7 @@ setae artifact delete <category> <name>
 
 Global flags (apply to all commands): `--json`, `-b <name>` / `--backend <name>`, `--url <url>`, `--token <token>`
 
-Use `-b <name>` to target a specific backend (e.g., `-b claude`, `-b slack`). Without it, the default backend from `setae config list` is used.
+Use `-b <name>` to target a specific backend (e.g., `-b claude`, `-b slack`). Without it, the default backend from `setae auth list` is used.
 
 ---
 

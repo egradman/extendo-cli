@@ -15,7 +15,7 @@ function getClient(opts: { url?: string; token?: string; backend?: string }): Se
     if (opts.backend) {
       console.error(`No backend named "${opts.backend}". Run: setae config list`);
     } else {
-      console.error("No backend configured. Run: setae config add <name> <url> <token>");
+      console.error("No backend configured. Run: setae auth add <name> <url> <token>");
     }
     process.exit(1);
   }
@@ -40,13 +40,13 @@ program
   .option("--token <token>", "bearer token (overrides config)")
   .option("-b, --backend <name>", "backend name (from config)");
 
-// --- Config commands ---
+// --- Auth commands ---
 
-const config = program
-  .command("config")
-  .description("manage backend configurations");
+const auth = program
+  .command("auth")
+  .description("manage backend authentication");
 
-config
+auth
   .command("add <name> <url> <token>")
   .description("add or update a named backend")
   .action((name: string, url: string, token: string) => {
@@ -54,7 +54,7 @@ config
     console.log(`Saved backend "${name}" → ${url}`);
   });
 
-config
+auth
   .command("default <name>")
   .description("set the default backend")
   .action((name: string) => {
@@ -67,13 +67,13 @@ config
     }
   });
 
-config
+auth
   .command("list")
   .description("list configured backends")
   .action(() => {
     const backends = listBackends();
     if (backends.length === 0) {
-      console.log("No backends configured. Run: setae config add <name> <url> <token>");
+      console.log("No backends configured. Run: setae auth add <name> <url> <token>");
       return;
     }
     for (const b of backends) {
@@ -82,7 +82,7 @@ config
     }
   });
 
-config
+auth
   .command("remove <name>")
   .description("remove a backend")
   .action((name: string) => {

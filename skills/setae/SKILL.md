@@ -10,7 +10,7 @@ Setae is a CLI that connects agents to human users via mobile push notifications
 
 ## Prerequisites
 
-The `setae` CLI must be on your PATH. Verify with `setae config list` to see configured backends. Use `-b <name>` to target a specific backend (e.g., `-b claude`, `-b slack`). Without it, the default backend is used.
+The `setae` CLI must be on your PATH. Verify with `setae auth list` to see configured backends. Use `-b <name>` to target a specific backend (e.g., `-b claude`, `-b slack`). Without it, the default backend is used.
 
 ## Messaging
 
@@ -95,11 +95,11 @@ Always use `--json` when parsing results programmatically. Always use `--wait` u
 
 All commands accept: `--json`, `-b <name>` / `--backend <name>`, `--url <url>`, `--token <token>`
 
-## Config Management
+## Auth Management
 
 ```bash
-setae config add <name> <url> <token>   # Add/update a backend
-setae config list                        # Show all backends
-setae config default <name>              # Set default
-setae config remove <name>               # Remove a backend
+setae auth add <name> <url> <token>      # Add/update a backend
+setae auth list                           # Show all backends
+setae auth default <name>                 # Set default
+setae auth remove <name>                  # Remove a backend
 ```
