@@ -1,0 +1,8 @@
+{
+  "name": "setae-cli",
+  "version": "0.1.0",
+  "description": "CLI and skills for interacting with Setae backends — messaging, artifacts, and decisions",
+  "author": {
+    "name": "Eric Gradman"
+  }
+}
