@@ -67,6 +67,7 @@ setae artifact delete <category> <name>
 | `multiple_choice` | Pick from options | `--option id:label[:desc]`, `--multi-select` |
 | `checklist` | Per-item approve/reject | `--item id:label[:desc]`, `--completion all_answered` |
 | `ranking` | Priority ordering | `--item id:label[:desc]` |
+| `triage` | Categorize into buckets (kanban on iPad) | `--heading id:label`, `--item heading/id:label[:desc]` |
 | `document_review` | Per-paragraph annotation | `--document-file` or `--document` |
 
 ### Minimal Examples
@@ -88,6 +89,17 @@ setae artifact create decisions review \
 ```
 
 Always use `--json` when parsing results programmatically. Always use `--wait` unless you need to do other work while the user decides (then use `artifact get --wait` later).
+
+### Linking Artifacts to Conversations
+
+Use `--conversation category:name` to link an artifact to an existing conversation thread. The user sees a "Discuss" button in the artifact UI that jumps to that thread, and the conversation shows a banner linking back to pending decisions.
+
+```bash
+setae artifact create decisions deploy \
+  --type yes_no --title "Deploy?" --prompt "Ready?" \
+  --conversation "ops:deploy-thread" \
+  --wait --json
+```
 
 ## Global Flags
 
