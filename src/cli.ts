@@ -155,6 +155,35 @@ program
     }
   });
 
+const thread = program
+  .command("thread")
+  .description("manage thread metadata");
+
+thread
+  .command("update <category> <name>")
+  .description("set thread title and/or note")
+  .option("--title <title>", "set display name")
+  .option("--note <note>", "set note")
+  .action(async (category: string, name: string, opts, cmd) => {
+    const globals = cmd.optsWithGlobals();
+    if (!opts.title && !opts.note) {
+      console.error("Provide at least one of: --title, --note");
+      process.exit(1);
+    }
+    const client = getClient(globals);
+    const updates: { displayName?: string; note?: string } = {};
+    if (opts.title) updates.displayName = opts.title;
+    if (opts.note) updates.note = opts.note;
+    const res = await client.updateEndpointMeta(category, name, updates);
+    if (globals.json) {
+      console.log(JSON.stringify(res, null, 2));
+    } else {
+      console.log(`Updated ${category}/${name}`);
+      if (res.meta.displayName) console.log(`  title: ${res.meta.displayName}`);
+      if (res.meta.note) console.log(`  note: ${res.meta.note}`);
+    }
+  });
+
 program
   .command("wait <category> <name>")
   .description("block until a new message appears")

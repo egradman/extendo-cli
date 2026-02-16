@@ -114,6 +114,17 @@ export class SetaeClient {
     );
   }
 
+  async updateEndpointMeta(
+    category: string,
+    name: string,
+    updates: { displayName?: string; note?: string },
+  ): Promise<{ ok: boolean; category: string; name: string; meta: { displayName?: string; note?: string } }> {
+    return this.request(
+      `/endpoints/${encodeURIComponent(category)}/${encodeURIComponent(name)}`,
+      { method: "PATCH", body: JSON.stringify(updates) },
+    );
+  }
+
   async poll(since: string): Promise<PollResponse> {
     return this.request<PollResponse>(
       `/poll?since=${encodeURIComponent(since)}`,
