@@ -154,13 +154,13 @@ function formatRanking(artifact: Artifact): string {
   return `${artifact.title} \u2014 ${items.length} items, awaiting ranking`;
 }
 
-function formatTriage(artifact: Artifact): string {
+function formatCategorize(artifact: Artifact): string {
   const payload = artifact.payload;
   const headings = payload.headings ?? [];
   const items = payload.items ?? [];
-  const arrangement = payload.triage ?? payload.buckets ?? {};
+  const arrangement = payload.categorize ?? payload.buckets ?? {};
 
-  const lines = [`${artifact.title} \u2014 Triage:`, ""];
+  const lines = [`${artifact.title} \u2014 Categorize:`, ""];
   for (const heading of headings) {
     const itemIds: string[] = arrangement[heading.id] ?? [];
     lines.push(`  [${heading.label}] (${itemIds.length} items)`);
@@ -215,8 +215,8 @@ export function formatArtifact(
     case "ranking":
       detail = formatRanking(artifact);
       break;
-    case "triage":
-      detail = formatTriage(artifact);
+    case "categorize":
+      detail = formatCategorize(artifact);
       break;
     case "document_review":
       detail = formatDocumentReview(artifact);

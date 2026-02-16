@@ -196,11 +196,11 @@ The `ranking` array is ordered from highest to lowest priority (item IDs).
 
 ---
 
-### triage
+### categorize
 
 **When to use:** Categorize items into named buckets. Bug severity triage, task categorization, priority buckets, kanban-style sorting.
 
-**Required flags:** `--type triage`, `--title`, `--prompt`, at least one `--heading`, at least one `--item`
+**Required flags:** `--type categorize`, `--title`, `--prompt`, at least one `--heading`, at least one `--item`
 
 **Heading format:** `--heading id:label` (repeatable)
 
@@ -209,8 +209,8 @@ The `ranking` array is ordered from highest to lowest priority (item IDs).
 **Example:**
 ```bash
 setae artifact create decisions bug-triage \
-  --type triage \
-  --title "Triage bugs by severity" \
+  --type categorize \
+  --title "Categorize bugs by severity" \
   --prompt "Categorize these bugs by severity" \
   --heading "critical:Critical" \
   --heading "major:Major" \
@@ -225,7 +225,7 @@ setae artifact create decisions bug-triage \
 ```json
 {
   "payload": {
-    "type": "triage",
+    "type": "categorize",
     "prompt": "Categorize these bugs by severity",
     "headings": [
       { "id": "critical", "label": "Critical" },
@@ -238,13 +238,13 @@ setae artifact create decisions bug-triage \
       { "id": "bug3", "label": "Typo in footer" }
     ],
     "buckets": { "critical": ["bug1"], "major": ["bug2"], "minor": ["bug3"] },
-    "triage": { "critical": ["bug1", "bug2"], "major": [], "minor": ["bug3"] }
+    "categorize": { "critical": ["bug1", "bug2"], "major": [], "minor": ["bug3"] }
   }
 }
 ```
 
 - `buckets` is the initial assignment (the "question")
-- `triage` is the user's result (the "answer"), same shape as `buckets`
+- `categorize` is the user's result (the "answer"), same shape as `buckets`
 - On the device: iPhone shows collapsible sections with context menu to move between buckets; iPad shows a kanban board with drag-and-drop
 
 ---
@@ -438,15 +438,15 @@ echo "$RESULT" | jq -r '.payload.ranking[]'          # IDs in priority order
 echo "$RESULT" | jq -r '.payload.ranking[0]'         # highest priority item
 ```
 
-### Triage
+### Categorize
 ```bash
 RESULT=$(setae artifact get decisions bug-triage --json)
-# Get the user's triage result (bucket assignments)
-echo "$RESULT" | jq '.payload.triage'
+# Get the user's categorization result (bucket assignments)
+echo "$RESULT" | jq '.payload.categorize'
 # Items in a specific bucket
-echo "$RESULT" | jq -r '.payload.triage.critical[]'
+echo "$RESULT" | jq -r '.payload.categorize.critical[]'
 # Count items per bucket
-echo "$RESULT" | jq '.payload.triage | to_entries[] | {key, count: (.value | length)}'
+echo "$RESULT" | jq '.payload.categorize | to_entries[] | {key, count: (.value | length)}'
 ```
 
 ### Document Review

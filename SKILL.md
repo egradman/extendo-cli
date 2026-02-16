@@ -67,7 +67,7 @@ setae artifact delete <category> <name>
 | `multiple_choice` | Pick from options | `--option id:label[:desc]`, `--multi-select` |
 | `checklist` | Per-item approve/reject | `--item id:label[:desc]`, `--completion all_answered` |
 | `ranking` | Priority ordering | `--item id:label[:desc]` |
-| `triage` | Categorize into buckets (kanban on iPad) | `--heading id:label`, `--item heading/id:label[:desc]` |
+| `categorize` | Categorize into buckets (kanban on iPad) | `--heading id:label`, `--item heading/id:label[:desc]` |
 | `document_review` | Per-paragraph annotation | `--document-file` or `--document` |
 
 ### Minimal Examples
