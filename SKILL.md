@@ -1,6 +1,6 @@
 ---
 name: setae-cli
-description: Communicate with a human user via Setae — send messages, wait for replies, create structured decisions (yes/no, multiple choice, checklist, ranking, document review). The user sees rich UI on their phone and responds. Triggers on "send message to user", "ask user", "get approval", "create decision", "artifact", "setae", or any task requiring human input via mobile push notifications.
+description: Communicate with a human user via Setae — send messages, wait for replies, create structured decisions (yes/no, multiple choice, checklist, ranking, document review), and build human decision gates into agent workflows. The user sees rich UI on their phone and responds. Triggers on "send message to user", "ask user", "get approval", "create decision", "artifact", "setae", "human gate", "gate on user", "block until user decides", "approval gate", "setae gate", or any task requiring human input via mobile push notifications.
 metadata:
   author: egradman
   version: "0.1.0"
@@ -39,6 +39,24 @@ setae wait <category> <name> --timeout 300
 ### List all threads
 ```bash
 setae threads [--json]
+```
+
+### Update thread title and note
+```bash
+setae thread update <category> <name> --title "Custom Title" --note "What's happening now"
+```
+
+**Proactive thread naming:** When working in a Setae thread, always set the title and note to reflect the current activity. Update the note as your task progresses so the user can see status at a glance without opening the thread.
+
+```bash
+# At the start of work
+setae thread update claude my-session --title "Refactoring auth module" --note "Reading existing code"
+
+# As work progresses
+setae thread update claude my-session --note "Running tests — 3 of 12 passing"
+
+# When done
+setae thread update claude my-session --note "Complete — all tests passing"
 ```
 
 **When to use messaging:** Status updates, open-ended questions, conversational exchanges. If you need a structured response (yes/no, pick from options, approve items), use artifacts instead.
@@ -104,6 +122,10 @@ setae artifact create decisions deploy \
 ## Global Flags
 
 All commands accept: `--json`, `-b <name>` / `--backend <name>`, `--url <url>`, `--token <token>`
+
+## Human Decision Gates
+
+For blocking an agent workflow on a human decision (approval gates, selection gates, review gates, etc.), see [setae-gate.md](setae-gate.md).
 
 ## Auth Management
 
