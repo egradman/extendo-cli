@@ -339,7 +339,7 @@ async function waitForArtifact(
   while (Date.now() < deadline) {
     await new Promise((r) => setTimeout(r, 2000));
     const artifact = await client.getArtifact(category, name);
-    if (artifact.status === "submitted" || artifact.status === "returned") return artifact;
+    if (artifact.status === "submitted" || artifact.status === "returned" || artifact.status === "dismissed") return artifact;
     if (
       typeof completion === "object" &&
       completion.condition === "all_answered"
