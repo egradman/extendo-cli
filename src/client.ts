@@ -106,11 +106,14 @@ export class SetaeClient {
     category: string,
     name: string,
     text: string,
-    role: "user" | "agent" = "agent",
+    role: "user" | "agent" = "user",
+    context?: string,
   ): Promise<PostResponse> {
+    const body: Record<string, unknown> = { text, role };
+    if (context) body.context = context;
     return this.request<PostResponse>(
       `/endpoints/${encodeURIComponent(category)}/${encodeURIComponent(name)}`,
-      { method: "POST", body: JSON.stringify({ text, role }) },
+      { method: "POST", body: JSON.stringify(body) },
     );
   }
 

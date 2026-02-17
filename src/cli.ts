@@ -120,7 +120,9 @@ program
 program
   .command("send <category> <name> [text]")
   .description("send a message to a thread")
-  .action(async (category: string, name: string, text: string | undefined, _opts, cmd) => {
+  .option("--context <text>", "context injected into Claude's system prompt")
+  .option("--context-file <path>", "read context from file")
+  .action(async (category: string, name: string, text: string | undefined, opts, cmd) => {
     const globals = cmd.optsWithGlobals();
     const client = getClient(globals);
     const message = text ?? await readStdin();
@@ -128,7 +130,11 @@ program
       console.error("No message text provided. Pass as argument or pipe via stdin.");
       process.exit(1);
     }
-    const res = await client.postMessage(category, name, message);
+    let context = opts.context;
+    if (opts.contextFile) {
+      context = readFileSync(opts.contextFile, "utf-8");
+    }
+    const res = await client.postMessage(category, name, message, "user", context);
     if (globals.json) {
       console.log(JSON.stringify(res, null, 2));
     } else {
@@ -139,7 +145,9 @@ program
 program
   .command("new <category> [text]")
   .description("create a new thread")
-  .action(async (category: string, text: string | undefined, _opts, cmd) => {
+  .option("--context <text>", "context injected into Claude's system prompt")
+  .option("--context-file <path>", "read context from file")
+  .action(async (category: string, text: string | undefined, opts, cmd) => {
     const globals = cmd.optsWithGlobals();
     const client = getClient(globals);
     const message = text ?? await readStdin();
@@ -147,7 +155,11 @@ program
       console.error("No message text provided. Pass as argument or pipe via stdin.");
       process.exit(1);
     }
-    const res = await client.postMessage(category, "__new__", message);
+    let context = opts.context;
+    if (opts.contextFile) {
+      context = readFileSync(opts.contextFile, "utf-8");
+    }
+    const res = await client.postMessage(category, "__new__", message, "user", context);
     if (globals.json) {
       console.log(JSON.stringify(res, null, 2));
     } else {
