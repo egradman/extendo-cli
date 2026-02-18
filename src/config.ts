@@ -16,7 +16,7 @@ export interface Config {
   default?: string;
 }
 
-const CONFIG_DIR = join(homedir(), ".config", "setae");
+const CONFIG_DIR = join(homedir(), ".config", "extendo");
 const CONFIG_FILE = join(CONFIG_DIR, "config.json");
 
 export function readConfig(): Config | null {

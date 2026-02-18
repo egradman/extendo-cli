@@ -2,24 +2,24 @@
 import { Command } from "commander";
 import { readFileSync } from "node:fs";
 import { resolveBackend, setBackend, setDefault, listBackends, removeBackend } from "./config.js";
-import { SetaeClient, SetaeClientError, type Artifact } from "./client.js";
+import { ExtendoClient, ExtendoClientError, type Artifact } from "./client.js";
 import { formatThreads, formatMessages, formatArtifacts, formatArtifact } from "./format.js";
 
-function getClient(opts: { url?: string; token?: string; backend?: string }): SetaeClient {
+function getClient(opts: { url?: string; token?: string; backend?: string }): ExtendoClient {
   // Explicit --url/--token override everything
   if (opts.url && opts.token) {
-    return new SetaeClient(opts.url, opts.token);
+    return new ExtendoClient(opts.url, opts.token);
   }
   const resolved = resolveBackend(opts.backend);
   if (!resolved) {
     if (opts.backend) {
-      console.error(`No backend named "${opts.backend}". Run: setae config list`);
+      console.error(`No backend named "${opts.backend}". Run: extendo config list`);
     } else {
-      console.error("No backend configured. Run: setae auth add <name> <url> <token>");
+      console.error("No backend configured. Run: extendo auth add <name> <url> <token>");
     }
     process.exit(1);
   }
-  return new SetaeClient(resolved.url, resolved.token);
+  return new ExtendoClient(resolved.url, resolved.token);
 }
 
 async function readStdin(): Promise<string> {
@@ -33,8 +33,8 @@ async function readStdin(): Promise<string> {
 const program = new Command();
 
 program
-  .name("setae")
-  .description("CLI for interacting with setae backends")
+  .name("extendo")
+  .description("CLI for interacting with Extendo backends")
   .option("--json", "output as JSON")
   .option("--url <url>", "backend URL (overrides config)")
   .option("--token <token>", "bearer token (overrides config)")
@@ -73,7 +73,7 @@ auth
   .action(() => {
     const backends = listBackends();
     if (backends.length === 0) {
-      console.log("No backends configured. Run: setae auth add <name> <url> <token>");
+      console.log("No backends configured. Run: extendo auth add <name> <url> <token>");
       return;
     }
     for (const b of backends) {
@@ -341,7 +341,7 @@ function buildPayload(opts: Record<string, any>): Record<string, any> {
 }
 
 async function waitForArtifact(
-  client: SetaeClient,
+  client: ExtendoClient,
   category: string,
   name: string,
   timeoutMs: number,
@@ -370,7 +370,7 @@ async function waitForArtifact(
 }
 
 function handleClientError(err: unknown, category?: string, name?: string): never {
-  if (err instanceof SetaeClientError) {
+  if (err instanceof ExtendoClientError) {
     if (err.statusCode === 404) {
       console.error(`Artifact not found: ${category}/${name}`);
       process.exit(2);

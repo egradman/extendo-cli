@@ -1,62 +1,62 @@
 ---
-name: setae-cli
-description: Communicate with a human user via Setae — send messages, wait for replies, create structured decisions (yes/no, multiple choice, checklist, ranking, document review), and build human decision gates into agent workflows. The user sees rich UI on their phone and responds. Triggers on "send message to user", "ask user", "get approval", "create decision", "artifact", "setae", "human gate", "gate on user", "block until user decides", "approval gate", "setae gate", or any task requiring human input via mobile push notifications.
+name: extendo-cli
+description: Communicate with a human user via Extendo — send messages, wait for replies, create structured decisions (yes/no, multiple choice, checklist, ranking, document review), and build human decision gates into agent workflows. The user sees rich UI on their phone and responds. Triggers on "send message to user", "ask user", "get approval", "create decision", "artifact", "extendo", "human gate", "gate on user", "block until user decides", "approval gate", "extendo gate", or any task requiring human input via mobile push notifications.
 metadata:
   author: egradman
   version: "0.1.0"
 ---
 
-# Setae CLI — Agent Skill
+# Extendo CLI — Agent Skill
 
-Setae is a CLI that connects agents to human users via mobile push notifications. You send messages and create structured decisions; the user sees rich UI on their phone and responds.
+Extendo is a CLI that connects agents to human users via mobile push notifications. You send messages and create structured decisions; the user sees rich UI on their phone and responds.
 
 ## Prerequisites
 
-The `setae` CLI must be on your PATH. Verify with `setae auth list` to see configured backends. Use `-b <name>` to target a specific backend (e.g., `-b claude`, `-b slack`). Without it, the default backend is used.
+The `extendo` CLI must be on your PATH. Verify with `extendo auth list` to see configured backends. Use `-b <name>` to target a specific backend (e.g., `-b claude`, `-b slack`). Without it, the default backend is used.
 
 ## Messaging
 
 ### Send a message
 ```bash
-setae send <category> <name> "Your message here"
+extendo send <category> <name> "Your message here"
 ```
 
 ### Create a new thread
 ```bash
-setae new <category> "First message for the new thread"
+extendo new <category> "First message for the new thread"
 ```
 
 ### Read messages
 ```bash
-setae read <category> <name>
+extendo read <category> <name>
 ```
 
 ### Wait for a reply (blocks until new message appears)
 ```bash
-setae wait <category> <name> --timeout 300
+extendo wait <category> <name> --timeout 300
 ```
 
 ### List all threads
 ```bash
-setae threads [--json]
+extendo threads [--json]
 ```
 
 ### Update thread title and note
 ```bash
-setae thread update <category> <name> --title "Custom Title" --note "What's happening now"
+extendo thread update <category> <name> --title "Custom Title" --note "What's happening now"
 ```
 
-**Proactive thread naming:** When working in a Setae thread, always set the title and note to reflect the current activity. Update the note as your task progresses so the user can see status at a glance without opening the thread.
+**Proactive thread naming:** When working in an Extendo thread, always set the title and note to reflect the current activity. Update the note as your task progresses so the user can see status at a glance without opening the thread.
 
 ```bash
 # At the start of work
-setae thread update claude my-session --title "Refactoring auth module" --note "Reading existing code"
+extendo thread update claude my-session --title "Refactoring auth module" --note "Reading existing code"
 
 # As work progresses
-setae thread update claude my-session --note "Running tests — 3 of 12 passing"
+extendo thread update claude my-session --note "Running tests — 3 of 12 passing"
 
 # When done
-setae thread update claude my-session --note "Complete — all tests passing"
+extendo thread update claude my-session --note "Complete — all tests passing"
 ```
 
 **When to use messaging:** Status updates, open-ended questions, conversational exchanges. If you need a structured response (yes/no, pick from options, approve items), use artifacts instead.
@@ -70,11 +70,11 @@ For the full artifact reference including all decision types, workflow patterns,
 ### Quick Reference
 
 ```bash
-setae artifact create <category> <name> --type <type> --title <title> [options]
-setae artifact get <category> <name> [--json] [--wait] [--timeout <s>]
-setae artifact update <category> <name> --payload <json> | --payload-file <path>
-setae artifact list [--status <status>] [--json]
-setae artifact delete <category> <name>
+extendo artifact create <category> <name> --type <type> --title <title> [options]
+extendo artifact get <category> <name> [--json] [--wait] [--timeout <s>]
+extendo artifact update <category> <name> --payload <json> | --payload-file <path>
+extendo artifact list [--status <status>] [--json]
+extendo artifact delete <category> <name>
 ```
 
 ### Decision Types at a Glance
@@ -92,16 +92,16 @@ setae artifact delete <category> <name>
 
 ```bash
 # Yes/no decision
-setae artifact create decisions deploy \
+extendo artifact create decisions deploy \
   --type yes_no --title "Deploy to prod?" --prompt "All tests pass." --wait --json
 
 # Multiple choice
-setae artifact create decisions model \
+extendo artifact create decisions model \
   --type multiple_choice --title "Pick model" --prompt "Which one?" \
   --option "a:Option A" --option "b:Option B" --wait --json
 
 # Checklist
-setae artifact create decisions review \
+extendo artifact create decisions review \
   --type checklist --title "Review items" \
   --item "x:Item X" --item "y:Item Y" --wait --json
 ```
@@ -113,7 +113,7 @@ Always use `--json` when parsing results programmatically. Always use `--wait` u
 Use `--conversation category:name` to link an artifact to an existing conversation thread. The user sees a "Discuss" button in the artifact UI that jumps to that thread, and the conversation shows a banner linking back to pending decisions.
 
 ```bash
-setae artifact create decisions deploy \
+extendo artifact create decisions deploy \
   --type yes_no --title "Deploy?" --prompt "Ready?" \
   --conversation "ops:deploy-thread" \
   --wait --json
@@ -125,13 +125,13 @@ All commands accept: `--json`, `-b <name>` / `--backend <name>`, `--url <url>`, 
 
 ## Human Decision Gates
 
-For blocking an agent workflow on a human decision (approval gates, selection gates, review gates, etc.), see [setae-gate.md](setae-gate.md).
+For blocking an agent workflow on a human decision (approval gates, selection gates, review gates, etc.), see [extendo-gate.md](extendo-gate.md).
 
 ## Auth Management
 
 ```bash
-setae auth add <name> <url> <token>      # Add/update a backend
-setae auth list                           # Show all backends
-setae auth default <name>                 # Set default
-setae auth remove <name>                  # Remove a backend
+extendo auth add <name> <url> <token>      # Add/update a backend
+extendo auth list                           # Show all backends
+extendo auth default <name>                 # Set default
+extendo auth remove <name>                  # Remove a backend
 ```

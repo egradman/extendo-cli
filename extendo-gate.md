@@ -1,11 +1,11 @@
-# Setae Gate — Human Decision Gates for Agent Workflows
+# Extendo Gate — Human Decision Gates for Agent Workflows
 
-A gate is a point in an agent workflow where execution blocks until a human makes a structured decision on their phone. The agent sends a decision via Setae, waits for the response, then acts on it.
+A gate is a point in an agent workflow where execution blocks until a human makes a structured decision on their phone. The agent sends a decision via Extendo, waits for the response, then acts on it.
 
 ## Prerequisites
 
-- The `setae` CLI must be on PATH with a configured backend (`setae auth list`)
-- The `setae-cli` skill provides the full artifact reference — this skill focuses on the gating *pattern*
+- The `extendo` CLI must be on PATH with a configured backend (`extendo auth list`)
+- The `extendo-cli` skill provides the full artifact reference — this skill focuses on the gating *pattern*
 
 ## Core Workflow
 
@@ -13,10 +13,10 @@ Every gate follows the same four-phase pattern:
 
 ### Phase 1: Create a conversation thread
 
-Start a new Setae thread explaining what the gate is about. Capture the thread UUID for linking.
+Start a new Extendo thread explaining what the gate is about. Capture the thread UUID for linking.
 
 ```bash
-THREAD=$(setae new "<category>" \
+THREAD=$(extendo new "<category>" \
   "Context message explaining why the user needs to make a decision." \
   --json | jq -r .endpoint.name)
 ```
@@ -28,7 +28,7 @@ The `<category>` is typically the repo path or project identifier (e.g., `/Users
 Create the structured decision and link it to the conversation thread. The `--wait` flag blocks the process until the user submits their response.
 
 ```bash
-RESULT=$(setae artifact create "<category>" "<gate-name>" \
+RESULT=$(extendo artifact create "<category>" "<gate-name>" \
   --type <type> \
   --title "Decision title" \
   --prompt "Question for the user" \
@@ -56,9 +56,9 @@ Update state, trigger downstream work, or branch on the decision.
 Block until the user approves or rejects.
 
 ```bash
-THREAD=$(setae new "$CATEGORY" "Requesting approval: $CONTEXT" --json | jq -r .endpoint.name)
+THREAD=$(extendo new "$CATEGORY" "Requesting approval: $CONTEXT" --json | jq -r .endpoint.name)
 
-RESULT=$(setae artifact create "$CATEGORY" "$GATE_NAME" \
+RESULT=$(extendo artifact create "$CATEGORY" "$GATE_NAME" \
   --type yes_no \
   --title "Approve this action?" \
   --prompt "$DETAILS" \
@@ -78,7 +78,7 @@ fi
 Block until the user picks from options.
 
 ```bash
-RESULT=$(setae artifact create "$CATEGORY" "$GATE_NAME" \
+RESULT=$(extendo artifact create "$CATEGORY" "$GATE_NAME" \
   --type multiple_choice \
   --title "Choose an option" \
   --prompt "Which approach?" \
@@ -98,7 +98,7 @@ For multi-select, add `--multi-select` and iterate over `.payload.selected[]`.
 Block until the user approves/rejects each item independently.
 
 ```bash
-RESULT=$(setae artifact create "$CATEGORY" "$GATE_NAME" \
+RESULT=$(extendo artifact create "$CATEGORY" "$GATE_NAME" \
   --type checklist \
   --title "Review these items" \
   --prompt "Approve or reject each item" \
@@ -119,7 +119,7 @@ echo "$RESULT" | jq '.payload.items[] | select(.decision == "rejected") | {id, c
 Block until the user orders items by priority.
 
 ```bash
-RESULT=$(setae artifact create "$CATEGORY" "$GATE_NAME" \
+RESULT=$(extendo artifact create "$CATEGORY" "$GATE_NAME" \
   --type ranking \
   --title "Prioritize these items" \
   --prompt "Drag to reorder (highest priority first)" \
@@ -139,7 +139,7 @@ TOP_PRIORITY=$(echo "$RESULT" | jq -r '.payload.ranking[0]')
 Block until the user sorts items into buckets (kanban on iPad).
 
 ```bash
-RESULT=$(setae artifact create "$CATEGORY" "$GATE_NAME" \
+RESULT=$(extendo artifact create "$CATEGORY" "$GATE_NAME" \
   --type categorize \
   --title "Categorize these items" \
   --prompt "Sort into the right buckets" \
@@ -161,7 +161,7 @@ echo "$RESULT" | jq '.payload.categorize'
 Block until the user annotates a document with per-paragraph comments.
 
 ```bash
-RESULT=$(setae artifact create "$CATEGORY" "$GATE_NAME" \
+RESULT=$(extendo artifact create "$CATEGORY" "$GATE_NAME" \
   --type document_review \
   --title "Review this document" \
   --prompt "Leave comments on any paragraphs that need changes" \

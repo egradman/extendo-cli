@@ -1,9 +1,9 @@
 {
-  "name": "setae",
+  "name": "extendo",
   "version": "0.0.1",
-  "description": "CLI for interacting with setae backends",
+  "description": "CLI for interacting with Extendo backends",
   "bin": {
-    "setae": "./dist/cli.js"
+    "extendo": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",

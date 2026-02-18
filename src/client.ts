@@ -54,17 +54,17 @@ export interface Artifact {
   payload: Record<string, any>;
 }
 
-export class SetaeClientError extends Error {
+export class ExtendoClientError extends Error {
   constructor(
     message: string,
     public readonly statusCode: number,
   ) {
     super(message);
-    this.name = "SetaeClientError";
+    this.name = "ExtendoClientError";
   }
 }
 
-export class SetaeClient {
+export class ExtendoClient {
   constructor(
     private url: string,
     private token: string,
@@ -81,7 +81,7 @@ export class SetaeClient {
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({})) as Record<string, unknown>;
-      throw new SetaeClientError(
+      throw new ExtendoClientError(
         (body as { error?: string }).error ?? `HTTP ${res.status}`,
         res.status,
       );
