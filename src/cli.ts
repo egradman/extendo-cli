@@ -270,6 +270,17 @@ function parseConversationLink(value: string): { category: string; name: string 
   return { category: value.slice(0, idx), name: value.slice(idx + 1) };
 }
 
+function parseNodeSpec(spec: string): { id: string; title: string; description: string; link: string; color: string; arcs: string[] } {
+  const parts = spec.split("|");
+  if (parts.length < 5) {
+    throw new Error(`Invalid node spec "${spec}". Expected id|title|description|link|color[|arc1,arc2,...]`);
+  }
+  const [id, title, description, link, color, ...rest] = parts;
+  const arcsStr = rest.join("|");
+  const arcs = arcsStr ? arcsStr.split(",").filter(Boolean) : [];
+  return { id, title, description, link, color, arcs };
+}
+
 function buildPayload(opts: Record<string, any>): Record<string, any> {
   const prompt = opts.prompt ?? opts.title;
   switch (opts.type) {
@@ -335,6 +346,15 @@ function buildPayload(opts: Record<string, any>): Record<string, any> {
         .map((text: string, i: number) => ({ id: `p${i + 1}`, markdown: text.trim() }));
       return { type: opts.type, prompt, document: markdown, paragraphs, annotations: [] };
     }
+    case "dag":
+      return {
+        type: opts.type,
+        prompt,
+        nodes: (opts.node ?? []).map((spec: string) => {
+          const parsed = parseNodeSpec(spec);
+          return { id: parsed.id, title: parsed.title, description: parsed.description, link: parsed.link, color: parsed.color, arcs: parsed.arcs };
+        }),
+      };
     default:
       return {};
   }
@@ -395,13 +415,14 @@ const artifact = program
 artifact
   .command("create <category> <name>")
   .description("create a new artifact")
-  .requiredOption("--type <type>", "artifact type (multiple_choice, yes_no, checklist, ranking, document_review, categorize)")
+  .requiredOption("--type <type>", "artifact type (multiple_choice, yes_no, checklist, ranking, document_review, categorize, dag)")
   .requiredOption("--title <title>", "artifact title")
   .option("--prompt <prompt>", "question text")
   .option("--description <text>", "longer description/context")
   .option("--option <value>", "option as id:label[:desc] (repeatable, for multiple_choice)", collect, [])
   .option("--item <value>", "item as id:label[:desc] (repeatable, for checklist/ranking/categorize)", collect, [])
   .option("--heading <value>", "heading as id:label (repeatable, for categorize)", collect, [])
+  .option("--node <value>", "node as id|title|desc|link|color|arc1,arc2,... (repeatable, for dag)", collect, [])
   .option("--multi-select", "allow multiple selections (multiple_choice)")
   .option("--document-file <path>", "load markdown from file (document_review)")
   .option("--document <markdown>", "inline markdown (document_review)")
