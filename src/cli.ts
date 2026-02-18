@@ -270,6 +270,20 @@ function parseConversationLink(value: string): { category: string; name: string 
   return { category: value.slice(0, idx), name: value.slice(idx + 1) };
 }
 
+function parseColumnSpec(spec: string): { abbrev: string; label: string }[] {
+  return spec.split(",").map(pair => {
+    const [abbrev, ...rest] = pair.split(":");
+    return { abbrev: abbrev.trim(), label: rest.join(":").trim() };
+  });
+}
+
+function parseRowSpec(spec: string, columnCount: number): { name: string; link: string; colors: string[] } {
+  const parts = spec.split("|");
+  const [name, link, ...colorParts] = parts;
+  const colors = Array.from({ length: columnCount }, (_, i) => (colorParts[i] ?? "").trim());
+  return { name, link: link || "", colors };
+}
+
 function parseNodeSpec(spec: string): { id: string; title: string; description: string; link: string; color: string; arcs: string[] } {
   const parts = spec.split("|");
   if (parts.length < 5) {
@@ -355,6 +369,15 @@ function buildPayload(opts: Record<string, any>): Record<string, any> {
           return { id: parsed.id, title: parsed.title, description: parsed.description, link: parsed.link, color: parsed.color, arcs: parsed.arcs };
         }),
       };
+    case "progress_grid": {
+      const columns = parseColumnSpec(opts.columns ?? "");
+      return {
+        type: opts.type,
+        prompt,
+        columns,
+        rows: (opts.row ?? []).map((spec: string) => parseRowSpec(spec, columns.length)),
+      };
+    }
     default:
       return {};
   }
@@ -415,7 +438,7 @@ const artifact = program
 artifact
   .command("create <category> <name>")
   .description("create a new artifact")
-  .requiredOption("--type <type>", "artifact type (multiple_choice, yes_no, checklist, ranking, document_review, categorize, dag)")
+  .requiredOption("--type <type>", "artifact type (multiple_choice, yes_no, checklist, ranking, document_review, categorize, dag, progress_grid)")
   .requiredOption("--title <title>", "artifact title")
   .option("--prompt <prompt>", "question text")
   .option("--description <text>", "longer description/context")
@@ -423,6 +446,8 @@ artifact
   .option("--item <value>", "item as id:label[:desc] (repeatable, for checklist/ranking/categorize)", collect, [])
   .option("--heading <value>", "heading as id:label (repeatable, for categorize)", collect, [])
   .option("--node <value>", "node as id|title|desc|link|color|arc1,arc2,... (repeatable, for dag)", collect, [])
+  .option("--columns <spec>", "columns as Abbrev:Label,... (for progress_grid)")
+  .option("--row <value>", "row as name|link|color1|color2|... (repeatable, for progress_grid)", collect, [])
   .option("--multi-select", "allow multiple selections (multiple_choice)")
   .option("--document-file <path>", "load markdown from file (document_review)")
   .option("--document <markdown>", "inline markdown (document_review)")
