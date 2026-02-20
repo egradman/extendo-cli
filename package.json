@@ -2,18 +2,17 @@
   "name": "extendo-cli",
   "version": "0.0.1",
   "description": "CLI for interacting with Extendo backends",
-  "bin": {
-    "extendo-cli": "./dist/cli.js"
-  },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run build:bundle",
+    "build:bundle": "esbuild src/cli.ts --bundle --platform=node --target=node18 --format=cjs --outfile=scripts/extendo",
     "dev": "tsc --watch"
   },
   "dependencies": {
     "commander": "^12.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.5.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.27.3",
+    "typescript": "^5.5.0"
   }
 }
