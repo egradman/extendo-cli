@@ -21,7 +21,7 @@ THREAD=$(extendo new "<category>" \
   --json | jq -r .endpoint.name)
 ```
 
-The `<category>` is typically the repo path or project identifier (e.g., `/Users/egradman/dev/setae`).
+The `<category>` is typically the repo path or project identifier (e.g., `my-project` or `ops`).
 
 ### Phase 2: Create a linked artifact with `--wait`
 

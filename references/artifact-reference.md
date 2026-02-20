@@ -24,7 +24,7 @@ Use artifacts when you need a **structured response** from the user -- not free-
 
 ```bash
 # Create an artifact (optionally block until user submits)
-extendo artifact create <category> <name> --type <type> --title <title> [options]
+extendo artifact create <category> <name> --type <type> --title <title> [--description <text>] [options]
 
 # Read current state of an artifact
 extendo artifact get <category> <name> [--json] [--wait] [--timeout <s>]
@@ -285,6 +285,96 @@ The document is auto-split into paragraphs with stable IDs (`p1`, `p2`, ...). Ea
 
 ---
 
+### dag
+
+**When to use:** Visualize a directed acyclic graph -- system architecture, dependency trees, task flows. Each node can have a title, description, link, color, and outgoing arcs to other nodes.
+
+**Required flags:** `--type dag`, `--title`, at least one `--node`
+
+**Node format:** `--node id|title|description|link|color|arc1,arc2,...` (repeatable). Arcs are comma-separated IDs of nodes this node points to.
+
+**Example:**
+```bash
+extendo artifact create decisions system-arch \
+  --type dag \
+  --title "System Architecture" \
+  --prompt "Service dependency graph" \
+  --node "api|API Server|Handles HTTP requests|https://github.com/repo|blue|db,cache,queue" \
+  --node "db|Database|PostgreSQL 15|https://wiki/db|green" \
+  --node "cache|Cache|Redis cluster|https://wiki/cache|orange" \
+  --node "queue|Job Queue|Sidekiq workers|https://wiki/queue|purple|db" \
+  --wait --json
+```
+
+**Result shape:**
+```json
+{
+  "payload": {
+    "type": "dag",
+    "prompt": "Service dependency graph",
+    "nodes": [
+      { "id": "api", "title": "API Server", "description": "Handles HTTP requests", "link": "https://github.com/repo", "color": "blue", "arcs": ["db", "cache", "queue"] },
+      { "id": "db", "title": "Database", "description": "PostgreSQL 15", "link": "https://wiki/db", "color": "green", "arcs": [] },
+      { "id": "cache", "title": "Cache", "description": "Redis cluster", "link": "https://wiki/cache", "color": "orange", "arcs": [] },
+      { "id": "queue", "title": "Job Queue", "description": "Sidekiq workers", "link": "https://wiki/queue", "color": "purple", "arcs": ["db"] }
+    ]
+  }
+}
+```
+
+The `dag` type is display-only -- it renders an interactive graph on the device. There is no user-submitted decision payload. Use it for informational visualizations.
+
+---
+
+### progress_grid
+
+**When to use:** Display a status matrix -- rows (items) vs columns (phases/stages). Each cell has a color indicating status. Useful for sprint boards, migration trackers, or multi-dimensional progress views.
+
+**Required flags:** `--type progress_grid`, `--title`, `--columns`, at least one `--row`
+
+**Column format:** `--columns "Abbrev:Label,Abbrev:Label,..."` -- comma-separated pairs.
+
+**Row format:** `--row "name|link|color1|color2|..."` (repeatable). Colors map positionally to columns. Common colors: `green`, `yellow`, `red`, `gray`, `blue`, `orange`. Leave empty for no color.
+
+**Example:**
+```bash
+extendo artifact create decisions sprint-tracker \
+  --type progress_grid \
+  --title "Sprint 42 Progress" \
+  --prompt "Feature status across phases" \
+  --columns "D:Design,I:Implement,T:Test,R:Review,S:Ship" \
+  --row "Auth SSO|https://jira/AUTH-1|green|green|yellow|red|gray" \
+  --row "Dashboard v2|https://jira/DASH-2|green|yellow|red|gray|gray" \
+  --row "API pagination|https://jira/API-3|green|green|green|green|yellow" \
+  --wait --json
+```
+
+**Result shape:**
+```json
+{
+  "payload": {
+    "type": "progress_grid",
+    "prompt": "Feature status across phases",
+    "columns": [
+      { "abbrev": "D", "label": "Design" },
+      { "abbrev": "I", "label": "Implement" },
+      { "abbrev": "T", "label": "Test" },
+      { "abbrev": "R", "label": "Review" },
+      { "abbrev": "S", "label": "Ship" }
+    ],
+    "rows": [
+      { "name": "Auth SSO", "link": "https://jira/AUTH-1", "colors": ["green", "green", "yellow", "red", "gray"] },
+      { "name": "Dashboard v2", "link": "https://jira/DASH-2", "colors": ["green", "yellow", "red", "gray", "gray"] },
+      { "name": "API pagination", "link": "https://jira/API-3", "colors": ["green", "green", "green", "green", "yellow"] }
+    ]
+  }
+}
+```
+
+The `progress_grid` type is display-only -- it renders a colored status grid on the device. There is no user-submitted decision payload. Use it for informational dashboards.
+
+---
+
 ## Workflow Patterns
 
 ### Pattern 1: Simple Blocking Decision
@@ -467,19 +557,41 @@ echo "$RESULT" | jq '
   }'
 ```
 
+### DAG
+```bash
+RESULT=$(extendo artifact get decisions arch --json)
+# All nodes
+echo "$RESULT" | jq '.payload.nodes[] | {id, title, color, arcs}'
+# Find nodes with no outgoing arcs (leaf nodes)
+echo "$RESULT" | jq -r '.payload.nodes[] | select(.arcs | length == 0) | .id'
+```
+
+### Progress Grid
+```bash
+RESULT=$(extendo artifact get decisions sprint --json)
+# All rows with their colors
+echo "$RESULT" | jq '.payload.rows[] | {name, colors}'
+# Column headers
+echo "$RESULT" | jq -r '.payload.columns[] | "\(.abbrev): \(.label)"'
+```
+
 ---
 
 ## Artifact Lifecycle
 
 ```
 pending  -->  in_progress  -->  submitted
+                           -->  returned
+                           -->  dismissed
 ```
 
 - **pending** -- Agent created it. User has not opened it yet.
 - **in_progress** -- User has opened/started interacting with it.
 - **submitted** -- User finalized their response. Terminal state. CLI `--wait` unblocks here.
+- **returned** -- Agent sent the artifact back for revision (e.g., document review round-trip). Terminal state. CLI `--wait` unblocks here.
+- **dismissed** -- User dismissed/discarded the artifact without completing it. Terminal state. CLI `--wait` unblocks here.
 
-The agent can mutate the artifact at any point before `submitted` (revise options, update the document, change the prompt). Once submitted, the artifact is read-only.
+The agent can mutate the artifact at any point before a terminal state (revise options, update the document, change the prompt). Once in a terminal state, the artifact is read-only.
 
 ---
 

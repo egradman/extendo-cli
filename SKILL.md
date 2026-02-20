@@ -1,6 +1,6 @@
 ---
 name: extendo-cli
-description: Communicate with a human user via Extendo — send messages, wait for replies, create structured decisions (yes/no, multiple choice, checklist, ranking, document review), and build human decision gates into agent workflows. The user sees rich UI on their phone and responds. Triggers on "send message to user", "ask user", "get approval", "create decision", "artifact", "extendo", "human gate", "gate on user", "block until user decides", "approval gate", "extendo gate", or any task requiring human input via mobile push notifications.
+description: Communicate with a human user via Extendo — send messages, wait for replies, create structured decisions (yes/no, multiple choice, checklist, ranking, categorize, document review, DAG, progress grid), and build human decision gates into agent workflows. The user sees rich UI on their phone and responds. Triggers on "send message to user", "ask user", "get approval", "create decision", "artifact", "extendo", "human gate", "gate on user", "block until user decides", "approval gate", "extendo gate", "dag", "progress grid", "status grid", or any task requiring human input via mobile push notifications.
 metadata:
   author: egradman
   version: "0.1.0"
@@ -19,11 +19,15 @@ The `extendo` CLI must be on your PATH. Verify with `extendo auth list` to see c
 ### Send a message
 ```bash
 extendo send <category> <name> "Your message here"
+extendo send <category> <name> "msg" --context "Extra system context"
+extendo send <category> <name> "msg" --context-file ./context.md
 ```
 
 ### Create a new thread
 ```bash
 extendo new <category> "First message for the new thread"
+extendo new <category> "msg" --context "System context for the thread"
+extendo new <category> "msg" --context-file ./context.md
 ```
 
 ### Read messages
@@ -70,7 +74,7 @@ For the full artifact reference including all decision types, workflow patterns,
 ### Quick Reference
 
 ```bash
-extendo artifact create <category> <name> --type <type> --title <title> [options]
+extendo artifact create <category> <name> --type <type> --title <title> [--description <text>] [options]
 extendo artifact get <category> <name> [--json] [--wait] [--timeout <s>]
 extendo artifact update <category> <name> --payload <json> | --payload-file <path>
 extendo artifact list [--status <status>] [--json]
@@ -87,6 +91,8 @@ extendo artifact delete <category> <name>
 | `ranking` | Priority ordering | `--item id:label[:desc]` |
 | `categorize` | Categorize into buckets (kanban on iPad) | `--heading id:label`, `--item heading/id:label[:desc]` |
 | `document_review` | Per-paragraph annotation | `--document-file` or `--document` |
+| `dag` | Directed graph visualization | `--node id\|title\|desc\|link\|color\|arc1,arc2,...` |
+| `progress_grid` | Status grid (rows x columns) | `--columns Abbrev:Label,...`, `--row name\|link\|c1\|c2\|...` |
 
 ### Minimal Examples
 
@@ -104,6 +110,20 @@ extendo artifact create decisions model \
 extendo artifact create decisions review \
   --type checklist --title "Review items" \
   --item "x:Item X" --item "y:Item Y" --wait --json
+
+# DAG (directed acyclic graph)
+extendo artifact create decisions arch \
+  --type dag --title "Architecture" --prompt "System dependencies" \
+  --node "api|API Server|Handles requests|https://link|blue|db,cache" \
+  --node "db|Database|Postgres|https://link|green" \
+  --node "cache|Cache|Redis|https://link|orange" --wait --json
+
+# Progress grid (status matrix)
+extendo artifact create decisions sprint \
+  --type progress_grid --title "Sprint Status" --prompt "Current progress" \
+  --columns "D:Design,I:Implement,T:Test,R:Review" \
+  --row "Auth flow|https://link|green|yellow|red|gray" \
+  --row "Dashboard|https://link|green|green|yellow|red" --wait --json
 ```
 
 Always use `--json` when parsing results programmatically. Always use `--wait` unless you need to do other work while the user decides (then use `artifact get --wait` later).
