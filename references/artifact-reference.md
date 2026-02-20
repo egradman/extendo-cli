@@ -13,8 +13,8 @@ Use artifacts when you need a **structured response** from the user -- not free-
 
 **Do NOT use artifacts for:**
 - Simple questions you can resolve in chat ("which file should I edit?")
-- Status updates or informational messages (use `extendo send`)
-- Anything where free-form text is the natural response (use `extendo send` + `extendo wait`)
+- Status updates or informational messages (use `npx extendo-cli send`)
+- Anything where free-form text is the natural response (use `npx extendo-cli send` + `npx extendo-cli wait`)
 
 **Mental model:** You create the artifact, the user sees it as a rich UI card on their phone, they interact with it, and you get the result back as structured JSON.
 
@@ -24,24 +24,24 @@ Use artifacts when you need a **structured response** from the user -- not free-
 
 ```bash
 # Create an artifact (optionally block until user submits)
-extendo artifact create <category> <name> --type <type> --title <title> [--description <text>] [options]
+npx extendo-cli artifact create <category> <name> --type <type> --title <title> [--description <text>] [options]
 
 # Read current state of an artifact
-extendo artifact get <category> <name> [--json] [--wait] [--timeout <s>]
+npx extendo-cli artifact get <category> <name> [--json] [--wait] [--timeout <s>]
 
 # Update an artifact's payload (e.g., push a document revision)
-extendo artifact update <category> <name> --payload <json> | --payload-file <path>
+npx extendo-cli artifact update <category> <name> --payload <json> | --payload-file <path>
 
 # List all artifacts, optionally filtered by status
-extendo artifact list [--status <status>] [--json]
+npx extendo-cli artifact list [--status <status>] [--json]
 
 # Delete an artifact
-extendo artifact delete <category> <name>
+npx extendo-cli artifact delete <category> <name>
 ```
 
 Global flags (apply to all commands): `--json`, `-b <name>` / `--backend <name>`, `--url <url>`, `--token <token>`
 
-Use `-b <name>` to target a specific backend (e.g., `-b claude`, `-b slack`). Without it, the default backend from `extendo auth list` is used.
+Use `-b <name>` to target a specific backend (e.g., `-b claude`, `-b slack`). Without it, the default backend from `npx extendo-cli auth list` is used.
 
 ---
 
@@ -55,7 +55,7 @@ Use `-b <name>` to target a specific backend (e.g., `-b claude`, `-b slack`). Wi
 
 **Example:**
 ```bash
-extendo artifact create decisions deploy-prod \
+npx extendo-cli artifact create decisions deploy-prod \
   --type yes_no \
   --title "Deploy v2.3.1 to production?" \
   --prompt "CI is green. All 847 tests pass. Ready to deploy?" \
@@ -88,7 +88,7 @@ The `decision` field is `true` (yes) or `false` (no).
 
 **Example:**
 ```bash
-extendo artifact create decisions pick-model \
+npx extendo-cli artifact create decisions pick-model \
   --type multiple_choice \
   --title "Choose the base model" \
   --prompt "Which model for the summarization task?" \
@@ -128,7 +128,7 @@ The `selected` array at the payload level contains the IDs of chosen options.
 
 **Example:**
 ```bash
-extendo artifact create decisions expense-review \
+npx extendo-cli artifact create decisions expense-review \
   --type checklist \
   --title "Approve Q4 expenses" \
   --prompt "Review each expense and approve or reject" \
@@ -166,7 +166,7 @@ Each item gets `decision` of `"approved"` or `"rejected"`, plus an optional `com
 
 **Example:**
 ```bash
-extendo artifact create decisions sprint-priority \
+npx extendo-cli artifact create decisions sprint-priority \
   --type ranking \
   --title "Prioritize sprint backlog" \
   --prompt "Drag to reorder by priority (highest first)" \
@@ -208,7 +208,7 @@ The `ranking` array is ordered from highest to lowest priority (item IDs).
 
 **Example:**
 ```bash
-extendo artifact create decisions bug-triage \
+npx extendo-cli artifact create decisions bug-triage \
   --type categorize \
   --title "Categorize bugs by severity" \
   --prompt "Categorize these bugs by severity" \
@@ -257,7 +257,7 @@ extendo artifact create decisions bug-triage \
 
 **Example:**
 ```bash
-extendo artifact create decisions rfc-review \
+npx extendo-cli artifact create decisions rfc-review \
   --type document_review \
   --title "Review: Auth Service RFC" \
   --prompt "Please review this RFC and leave your comments" \
@@ -295,7 +295,7 @@ The document is auto-split into paragraphs with stable IDs (`p1`, `p2`, ...). Ea
 
 **Example:**
 ```bash
-extendo artifact create decisions system-arch \
+npx extendo-cli artifact create decisions system-arch \
   --type dag \
   --title "System Architecture" \
   --prompt "Service dependency graph" \
@@ -338,7 +338,7 @@ The `dag` type is display-only -- it renders an interactive graph on the device.
 
 **Example:**
 ```bash
-extendo artifact create decisions sprint-tracker \
+npx extendo-cli artifact create decisions sprint-tracker \
   --type progress_grid \
   --title "Sprint 42 Progress" \
   --prompt "Feature status across phases" \
@@ -383,7 +383,7 @@ Create the artifact with `--wait`. Your process blocks until the user submits. R
 
 ```bash
 # Ask for deployment approval, block until answered
-RESULT=$(extendo artifact create decisions deploy-v2 \
+RESULT=$(npx extendo-cli artifact create decisions deploy-v2 \
   --type yes_no \
   --title "Deploy v2.0?" \
   --prompt "All tests pass. Deploy to production?" \
@@ -403,7 +403,7 @@ Create the artifact without `--wait`. Do other work. Come back later with `get -
 
 ```bash
 # Create the decision (returns immediately)
-extendo artifact create decisions model-choice \
+npx extendo-cli artifact create decisions model-choice \
   --type multiple_choice \
   --title "Pick deployment region" \
   --prompt "Where should we deploy?" \
@@ -414,7 +414,7 @@ extendo artifact create decisions model-choice \
 # ... do other work while user decides ...
 
 # Block until user submits
-RESULT=$(extendo artifact get decisions model-choice --wait --json --timeout 7200)
+RESULT=$(npx extendo-cli artifact get decisions model-choice --wait --json --timeout 7200)
 SELECTED=$(echo "$RESULT" | jq -r '.payload.selected[0]')
 echo "User chose: $SELECTED"
 ```
@@ -425,7 +425,7 @@ Create a document review, read annotations, revise the document, push a new revi
 
 ```bash
 # Round 1: Create the review
-extendo artifact create decisions rfc-review \
+npx extendo-cli artifact create decisions rfc-review \
   --type document_review \
   --title "Review: Auth RFC" \
   --document-file ./rfc-v1.md \
@@ -436,11 +436,11 @@ ANNOTATION_COUNT=$(jq '.payload.annotations | length' /tmp/round1.json)
 if [ "$ANNOTATION_COUNT" -gt 0 ]; then
   # Read annotations, revise the document (your agent logic here)
   # Then push revision 2 with change markers:
-  extendo artifact update decisions rfc-review \
+  npx extendo-cli artifact update decisions rfc-review \
     --payload-file /tmp/revision2-payload.json
 
   # Wait for round 2
-  extendo artifact get decisions rfc-review --wait --json > /tmp/round2.json
+  npx extendo-cli artifact get decisions rfc-review --wait --json > /tmp/round2.json
 fi
 ```
 
@@ -451,7 +451,7 @@ The revision payload should include updated `paragraphs` with `change` markers (
 Attach a conversation endpoint so the user can discuss the decision via voice before committing.
 
 ```bash
-extendo artifact create decisions budget-approval \
+npx extendo-cli artifact create decisions budget-approval \
   --type checklist \
   --title "Approve Q1 budget" \
   --item "infra:Infrastructure $45k" \
@@ -476,7 +476,7 @@ The artifact is considered complete only when the user explicitly taps the Submi
 The artifact auto-completes when every item in the `items` array has a `decision` value. Use this with `checklist` type when you want the artifact to resolve as soon as the user has made a decision on every item, without requiring a separate submit tap.
 
 ```bash
-extendo artifact create decisions pr-review \
+npx extendo-cli artifact create decisions pr-review \
   --type checklist \
   --title "Review PR changes" \
   --item "api:API changes" \
@@ -494,25 +494,25 @@ Always use `--json` when you need to programmatically read the result. Here are 
 
 ### Yes/No
 ```bash
-RESULT=$(extendo artifact get decisions deploy --json)
+RESULT=$(npx extendo-cli artifact get decisions deploy --json)
 echo "$RESULT" | jq -r '.payload.decision'          # true or false
 ```
 
 ### Multiple Choice (single select)
 ```bash
-RESULT=$(extendo artifact get decisions model --json)
+RESULT=$(npx extendo-cli artifact get decisions model --json)
 echo "$RESULT" | jq -r '.payload.selected[0]'
 ```
 
 ### Multiple Choice (multi select)
 ```bash
-RESULT=$(extendo artifact get decisions features --json)
+RESULT=$(npx extendo-cli artifact get decisions features --json)
 echo "$RESULT" | jq -r '.payload.selected[]'
 ```
 
 ### Checklist
 ```bash
-RESULT=$(extendo artifact get decisions expenses --json)
+RESULT=$(npx extendo-cli artifact get decisions expenses --json)
 # All items with their decisions
 echo "$RESULT" | jq '.payload.items[] | {id, decision, comment}'
 # Just approved items
@@ -523,14 +523,14 @@ echo "$RESULT" | jq '.payload.items[] | select(.decision == "rejected") | {id, c
 
 ### Ranking
 ```bash
-RESULT=$(extendo artifact get decisions priorities --json)
+RESULT=$(npx extendo-cli artifact get decisions priorities --json)
 echo "$RESULT" | jq -r '.payload.ranking[]'          # IDs in priority order
 echo "$RESULT" | jq -r '.payload.ranking[0]'         # highest priority item
 ```
 
 ### Categorize
 ```bash
-RESULT=$(extendo artifact get decisions bug-triage --json)
+RESULT=$(npx extendo-cli artifact get decisions bug-triage --json)
 # Get the user's categorization result (bucket assignments)
 echo "$RESULT" | jq '.payload.categorize'
 # Items in a specific bucket
@@ -541,7 +541,7 @@ echo "$RESULT" | jq '.payload.categorize | to_entries[] | {key, count: (.value |
 
 ### Document Review
 ```bash
-RESULT=$(extendo artifact get decisions rfc --json)
+RESULT=$(npx extendo-cli artifact get decisions rfc --json)
 # All annotations
 echo "$RESULT" | jq '.payload.annotations[] | {paragraphId, comment}'
 # Count annotations
@@ -559,7 +559,7 @@ echo "$RESULT" | jq '
 
 ### DAG
 ```bash
-RESULT=$(extendo artifact get decisions arch --json)
+RESULT=$(npx extendo-cli artifact get decisions arch --json)
 # All nodes
 echo "$RESULT" | jq '.payload.nodes[] | {id, title, color, arcs}'
 # Find nodes with no outgoing arcs (leaf nodes)
@@ -568,7 +568,7 @@ echo "$RESULT" | jq -r '.payload.nodes[] | select(.arcs | length == 0) | .id'
 
 ### Progress Grid
 ```bash
-RESULT=$(extendo artifact get decisions sprint --json)
+RESULT=$(npx extendo-cli artifact get decisions sprint --json)
 # All rows with their colors
 echo "$RESULT" | jq '.payload.rows[] | {name, colors}'
 # Column headers
@@ -611,7 +611,7 @@ All errors print to stderr. Successful output goes to stdout.
 ## Anti-patterns
 
 **Don't use artifacts for simple yes/no that could be a chat message.**
-If the question is low-stakes and conversational ("should I continue?"), just send a message with `extendo send` and wait for a reply with `extendo wait`. Reserve artifacts for decisions that benefit from structured UI.
+If the question is low-stakes and conversational ("should I continue?"), just send a message with `npx extendo-cli send` and wait for a reply with `npx extendo-cli wait`. Reserve artifacts for decisions that benefit from structured UI.
 
 **Don't create without `--wait` and forget to check the result.**
 If you create an artifact without `--wait`, you must eventually call `artifact get --wait` or `artifact get --json` to read the user's response. An unchecked artifact is a dead end.

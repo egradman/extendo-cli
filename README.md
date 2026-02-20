@@ -6,7 +6,7 @@ Extendo lets your agents ask humans for structured decisions — approvals, choi
 
 ```bash
 # Agent asks for deploy approval → user sees a yes/no card on their phone
-extendo artifact create ops deploy \
+npx extendo-cli artifact create ops deploy \
   --type yes_no --title "Deploy to prod?" \
   --prompt "All 847 tests pass. Ship it?" \
   --wait --json
@@ -20,33 +20,29 @@ No Slack threads. No email. No "reply YES to confirm." Purpose-built UI for each
 
 ## Quickstart
 
-### 1. Install
-
-```bash
-npm install -g extendo
-```
-
-### 2. Get the Extendo app
+### 1. Get the Extendo app
 
 Extendo is an iOS app. Install it on your iPhone or iPad via TestFlight (invite link coming soon).
 
-### 3. Connect to the public backend
+### 2. Connect to the public backend
 
 Visit **[public.extendo.sh](https://public.extendo.sh)** to get an API token. Scan the QR code with the Extendo app on your phone to add the backend.
 
 ```bash
-extendo auth add public https://public.extendo.sh <your-token>
+npx extendo-cli auth add public https://public.extendo.sh <your-token>
 ```
 
 > **Note:** The public backend is the fastest way to try Extendo, but for production use you'll get a better experience hosting your own infrastructure — tighter integration with your agents, lower latency, and full control. See [extendo-backends](https://github.com/egradman/extendo-backends) for self-hosting on Cloudflare Workers or inside a Tailnet.
 
-### 4. Add the Claude Code skill (optional)
+### 3. Add the agent skill (optional)
 
 If you use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), install the skill so Claude knows how to use Extendo automatically:
 
 ```bash
 npx skills add github:extendo-cli
 ```
+
+This works with any agent framework that can run shell commands — the skill is just documentation, and `npx extendo` is the CLI.
 
 ## What can it do?
 
@@ -55,9 +51,9 @@ npx skills add github:extendo-cli
 Send messages to a human and wait for replies:
 
 ```bash
-extendo new project "Starting the auth refactor. I'll check in when I hit a decision point."
-extendo send project my-thread "Found 3 approaches. Creating a decision artifact."
-extendo wait project my-thread --timeout 300
+npx extendo-cli new project "Starting the auth refactor. I'll check in when I hit a decision point."
+npx extendo-cli send project my-thread "Found 3 approaches. Creating a decision artifact."
+npx extendo-cli wait project my-thread --timeout 300
 ```
 
 ### Structured Decisions
@@ -81,10 +77,10 @@ Block an agent workflow until a human decides:
 
 ```bash
 # Create a conversation thread for context
-THREAD=$(extendo new ops "Requesting deploy approval for v2.3.1" --json | jq -r .endpoint.name)
+THREAD=$(npx extendo-cli new ops "Requesting deploy approval for v2.3.1" --json | jq -r .endpoint.name)
 
 # Create a linked yes/no gate — blocks until the user taps Approve or Reject
-RESULT=$(extendo artifact create ops deploy-v2 \
+RESULT=$(npx extendo-cli artifact create ops deploy-v2 \
   --type yes_no \
   --title "Deploy v2.3.1 to production?" \
   --prompt "CI green. 847 tests pass. No regressions." \
@@ -103,12 +99,12 @@ fi
 ### Messaging
 
 ```bash
-extendo new <category> "message"              # Create a new thread
-extendo send <category> <name> "message"      # Send to existing thread
-extendo read <category> <name>                # Read messages
-extendo wait <category> <name> --timeout 300  # Block until reply
-extendo threads                               # List all threads
-extendo thread update <cat> <name> --title "..." --note "..."
+npx extendo-cli new <category> "message"              # Create a new thread
+npx extendo-cli send <category> <name> "message"      # Send to existing thread
+npx extendo-cli read <category> <name>                # Read messages
+npx extendo-cli wait <category> <name> --timeout 300  # Block until reply
+npx extendo-cli threads                               # List all threads
+npx extendo-cli thread update <cat> <name> --title "..." --note "..."
 ```
 
 Both `send` and `new` accept `--context <text>` or `--context-file <path>` to inject system context.
@@ -116,20 +112,20 @@ Both `send` and `new` accept `--context <text>` or `--context-file <path>` to in
 ### Artifacts
 
 ```bash
-extendo artifact create <cat> <name> --type <type> --title <title> [options]
-extendo artifact get <cat> <name> [--wait] [--timeout <s>] [--json]
-extendo artifact update <cat> <name> --payload <json> | --payload-file <path>
-extendo artifact list [--status <status>] [--json]
-extendo artifact delete <cat> <name>
+npx extendo-cli artifact create <cat> <name> --type <type> --title <title> [options]
+npx extendo-cli artifact get <cat> <name> [--wait] [--timeout <s>] [--json]
+npx extendo-cli artifact update <cat> <name> --payload <json> | --payload-file <path>
+npx extendo-cli artifact list [--status <status>] [--json]
+npx extendo-cli artifact delete <cat> <name>
 ```
 
 ### Auth
 
 ```bash
-extendo auth add <name> <url> <token>   # Add/update a backend
-extendo auth list                       # Show configured backends
-extendo auth default <name>             # Set default backend
-extendo auth remove <name>              # Remove a backend
+npx extendo-cli auth add <name> <url> <token>   # Add/update a backend
+npx extendo-cli auth list                       # Show configured backends
+npx extendo-cli auth default <name>             # Set default backend
+npx extendo-cli auth remove <name>              # Remove a backend
 ```
 
 ### Global Flags

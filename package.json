@@ -1,9 +1,9 @@
 {
-  "name": "extendo",
+  "name": "extendo-cli",
   "version": "0.0.1",
   "description": "CLI for interacting with Extendo backends",
   "bin": {
-    "extendo": "./dist/cli.js"
+    "extendo-cli": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",
