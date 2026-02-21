@@ -26,7 +26,7 @@ With a self-hosted backend, Extendo also works in the other direction. Capture i
 
 ### 1. Get the Extendo app
 
-Extendo is an iOS app. Install it on your iPhone or iPad via TestFlight (invite link coming soon).
+Extendo is an iOS app. Install it on your iPhone or iPad via [TestFlight](https://extendo.sh).
 
 ### 2. Connect to the public backend
 
