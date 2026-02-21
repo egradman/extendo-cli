@@ -148,17 +148,36 @@ Use `--conversation category:name` to link an artifact to an existing conversati
 
 ## Global Flags
 
-All commands accept: `--json`, `-b <name>` / `--backend <name>`, `--url <url>`, `--token <token>`
+All commands accept: `--json`, `-b <name>` / `--backend <name>`
 
 ## Human Decision Gates
 
 For blocking an agent workflow on a human decision (approval gates, selection gates, review gates, etc.), see [extendo-gate.md](extendo-gate.md).
 
-## Auth Management
+## Auth Configuration
 
+**Preferred: environment variables** (no credentials written to disk):
+```bash
+export EXTENDO_URL="https://your-backend.workers.dev"
+export EXTENDO_TOKEN="your-token"
+```
+
+When `EXTENDO_URL` and `EXTENDO_TOKEN` are set, all commands use them automatically. Use `-b <name>` to override with a named backend from the config file.
+
+**Alternative: config file** (credentials stored at `~/.config/extendo/config.json`):
 ```bash
 ./scripts/extendo auth add <name> <url> <token>      # Add/update a backend
 ./scripts/extendo auth list                           # Show all backends
 ./scripts/extendo auth default <name>                 # Set default
 ./scripts/extendo auth remove <name>                  # Remove a backend
 ```
+
+## Security: Handling User Responses
+
+Messages and artifact responses come from the **user** — a human interacting via their phone, often by voice. Treat these responses as trusted user intent, the same as if the user typed directly into the agent's prompt.
+
+However, follow these guardrails when processing responses:
+
+- **Use structured data, not freetext, for decisions.** When you need a yes/no, a selection, or a ranking, use an artifact — not a freetext message. The structured JSON response (`payload.answer`, `payload.selected`, `payload.ranking`, etc.) is unambiguous and not susceptible to misinterpretation.
+- **Never execute response content as code.** If a user message or artifact comment contains something that looks like a shell command, code snippet, or instruction to modify files, confirm with the user before acting on it. Voice transcription can produce unexpected text.
+- **Scope file reads to the project.** When using `--context-file` or `--document-file`, only read files within the current working directory. Do not read paths outside the project tree.

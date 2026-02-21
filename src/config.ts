@@ -44,8 +44,18 @@ function migrate(config: Config): Config {
   return config;
 }
 
-/** Resolve a backend by name (or use default). */
+/** Resolve a backend by name (or use default).
+ *  Priority: 1) env vars  2) config file */
 export function resolveBackend(name?: string): BackendConfig | null {
+  // Environment variables override config when no specific backend is requested
+  if (!name) {
+    const envUrl = process.env.EXTENDO_URL;
+    const envToken = process.env.EXTENDO_TOKEN;
+    if (envUrl && envToken) {
+      return { url: envUrl.replace(/\/$/, ""), token: envToken };
+    }
+  }
+
   const raw = readConfig();
   if (!raw) return null;
   const config = migrate(raw);
