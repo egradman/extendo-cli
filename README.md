@@ -242,16 +242,161 @@ sequenceDiagram
 
 ## Artifact Types
 
-| Type | Screenshot | Description |
-|---|---|---|
-| **DAG** | ![DAG](https://extendo.sh/screenshots/dag.jpg) | Dependency graphs rendered natively on your phone. Track which agents are active, which steps are done, and what's blocked. |
-| **Progress Grid** | ![Progress Grid](https://extendo.sh/screenshots/progress-grid.jpg) | Track multiple workstreams at a glance. Each row is a feature, each column is a pipeline stage. |
-| **Checklist** | ![Checklist](https://extendo.sh/screenshots/checklist.jpg) | Select multiple items. Review and approve sprint tasks, feature flags, or deployment checklists. |
-| **Multiple Choice** | ![Multiple Choice](https://extendo.sh/screenshots/multiple-choice.jpg) | Pick one from a list. Each option has a title and description so agents can give you full context. |
-| **Categorize** | ![Categorize](https://extendo.sh/screenshots/categorize.jpg) | Drag items into categories. Kanban-style triage — sort tickets into priority buckets from your phone. |
-| **Yes / No** | ![Yes / No](https://extendo.sh/screenshots/yes-no-merge.jpg) | Binary approval gates. PR stats, test results, reviews — all in the prompt. Tap and done. |
-| **Document Review** | ![Document Review](https://extendo.sh/screenshots/document-review.jpg) | Read and annotate specs, plans, or diffs right on your phone. Approve or send back with feedback. |
-| **Dark Mode** | ![Dark Mode](https://extendo.sh/screenshots/dark-mode-choice.jpg) | All artifact types support dark mode, following your system appearance settings. |
+### Yes / No
+
+Binary approval gates. PR stats, test results, reviews — all in the prompt. Tap and done.
+
+![Yes / No](https://extendo.sh/screenshots/yes-no-merge.jpg)
+
+```bash
+extendo artifact create demo merge-gate \
+  --type yes_no \
+  --title "Merge to main?" \
+  --prompt "PR #247 — Add rate limiting middleware
+12 files changed, +340 -28
+All 847 tests passing
+2 approving reviews
+No merge conflicts"
+```
+
+### Multiple Choice
+
+Pick one from a list. Each option has a title and description so agents can give you full context.
+
+![Multiple Choice](https://extendo.sh/screenshots/multiple-choice.jpg)
+
+```bash
+extendo artifact create demo implementation-choice \
+  --type multiple_choice \
+  --title "Where should we implement the rate limiter?" \
+  --prompt "Each option has trade-offs for latency, state, and complexity." \
+  --option "backend:Backend API:Express middleware — simple, per-instance counters" \
+  --option "core:Core Library:Shared logic — reusable across services, needs Redis" \
+  --option "edge:Edge / CDN:Cloudflare Workers — lowest latency, limited state" \
+  --option "gateway:API Gateway:Kong/Nginx — centralized, no code changes needed"
+```
+
+### Checklist
+
+Select multiple items. Review and approve sprint tasks, feature flags, or deployment checklists.
+
+![Checklist](https://extendo.sh/screenshots/checklist.jpg)
+
+```bash
+extendo artifact create demo todo-checklist \
+  --type checklist \
+  --title "Sprint Tasks" \
+  --prompt "Review and approve each task for this sprint" \
+  --item "migrate-db:Migrate user table to new schema:Adds email_verified column" \
+  --item "fix-auth:Fix OAuth callback race condition:Users get 403 after Google login" \
+  --item "cache-layer:Add Redis caching to /api/feed:P95 latency 1.2s, target 200ms" \
+  --item "dark-mode:Implement dark mode toggle:CSS custom properties in place" \
+  --item "onboard-flow:Redesign onboarding flow:New Figma mocks from design" \
+  --item "api-docs:Update OpenAPI spec for v2 endpoints:Three new endpoints" \
+  --completion all_answered
+```
+
+### Categorize
+
+Drag items into categories. Kanban-style triage — sort tickets into priority buckets from your phone.
+
+![Categorize](https://extendo.sh/screenshots/categorize.jpg)
+
+```bash
+extendo artifact create demo kanban-triage \
+  --type categorize \
+  --title "Sprint Triage" \
+  --prompt "Drag tickets into the right priority bucket" \
+  --heading "p0:P0 — Ship Today" \
+  --heading "p1:P1 — This Sprint" \
+  --heading "p2:P2 — Next Sprint" \
+  --heading "backlog:Backlog" \
+  --item "p0/ENG-401:Login crash on iOS 18" \
+  --item "p0/ENG-388:Payment webhook timeout" \
+  --item "p1/ENG-412:Dashboard slow query" \
+  --item "p1/ENG-395:Add SSO for enterprise" \
+  --item "p2/ENG-420:Migrate to Postgres 16" \
+  --item "p2/ENG-433:Redesign settings page" \
+  --item "backlog/ENG-441:Add CSV export" \
+  --item "backlog/ENG-445:Dark mode for admin panel" \
+  --item "p1/ENG-402:Fix email threading" \
+  --item "backlog/ENG-450:Upgrade React to v19"
+```
+
+### Document Review
+
+Read and annotate specs, plans, or diffs right on your phone. Approve or send back with feedback.
+
+![Document Review](https://extendo.sh/screenshots/document-review.jpg)
+
+```bash
+extendo artifact create demo ios-dark-mode-spec-review \
+  --type document_review \
+  --title "Spec Review: iOS Dark Mode" \
+  --prompt "Review the dark mode spec. Approve or annotate." \
+  --document "# Dark mode support with Settings toggle
+
+## Summary
+Add dark mode support with a user-facing appearance
+picker in Settings. Three modes: System, Light, Dark.
+
+## What needs to change
+1. New @AppStorage key — appearanceMode
+2. SettingsView — new Appearance section
+3. Apply .preferredColorScheme() at root
+4. Review AccentColor contrast in dark mode"
+```
+
+### DAG
+
+Dependency graphs rendered natively on your phone. Track which agents are active, which steps are done, and what's blocked.
+
+![DAG](https://extendo.sh/screenshots/dag.jpg)
+
+```bash
+extendo artifact create demo molecule-dag \
+  --type dag \
+  --title "thread-sort-filter" \
+  --prompt "Molecule in progress — 2 agents active" \
+  --node "spec|Discover & Specify|Write spec|#34C759|review-spec" \
+  --node "review-spec|Human Review: Spec|Review spec|#34C759|plan" \
+  --node "plan|Plan|Create implementation plan|#34C759|review-plan" \
+  --node "review-plan|Human Review: Plan|Review plan|#34C759|worktree,decompose" \
+  --node "worktree|Create Worktree|Set up feature branch|#34C759|impl-sort,impl-filter" \
+  --node "decompose|Decompose|Break into subtasks|#34C759|impl-sort,impl-filter" \
+  --node "impl-sort|BackendManager: sort|Sort by activity|#007AFF|impl-empty,agent-review" \
+  --node "impl-filter|SidebarView: filter|Add filter chips|#007AFF|agent-review" \
+  --node "impl-empty|SidebarView: empty state|Empty states|#8E8E93|agent-review" \
+  --node "agent-review|Agent Review|Automated review|#8E8E93|human-review" \
+  --node "human-review|Human Review: Final|Final review|#8E8E93|merge" \
+  --node "merge|Merge & Cleanup|Merge to main|#8E8E93"
+```
+
+### Progress Grid
+
+Track multiple workstreams at a glance. Each row is a feature, each column is a pipeline stage.
+
+![Progress Grid](https://extendo.sh/screenshots/progress-grid.jpg)
+
+```bash
+extendo artifact create demo progress-grid \
+  --type progress_grid \
+  --title "Extendo Molecules" \
+  --prompt "Feature pipeline status" \
+  --columns "SP:Spec,PL:Plan,IM:Impl,RV:Review,MG:Merge" \
+  --row "dag-artifact||green|green|green|green|green" \
+  --row "progress-grid-artifact||green|green|green|green|green" \
+  --row "thread-sort-filter||green|green|yellow|gray|gray" \
+  --row "thread-list-metadata||green|yellow|gray|gray|gray" \
+  --row "artifact-deep-links||yellow|gray|gray|gray|gray" \
+  --row "decision-tombstones||green|green|green|yellow|gray"
+```
+
+### Dark Mode
+
+All artifact types support dark mode, following your system appearance settings.
+
+![Dark Mode](https://extendo.sh/screenshots/dark-mode-choice.jpg)
 
 ## License
 
