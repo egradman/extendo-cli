@@ -240,6 +240,19 @@ sequenceDiagram
     Note over App,Agent: user may reuse this session<br/>or treat it as ephemeral
 ```
 
+## Artifact Types
+
+| Type | Screenshot | Description |
+|---|---|---|
+| **DAG** | ![DAG](https://extendo.sh/screenshots/dag.jpg) | Dependency graphs rendered natively on your phone. Track which agents are active, which steps are done, and what's blocked. |
+| **Progress Grid** | ![Progress Grid](https://extendo.sh/screenshots/progress-grid.jpg) | Track multiple workstreams at a glance. Each row is a feature, each column is a pipeline stage. |
+| **Checklist** | ![Checklist](https://extendo.sh/screenshots/checklist.jpg) | Select multiple items. Review and approve sprint tasks, feature flags, or deployment checklists. |
+| **Multiple Choice** | ![Multiple Choice](https://extendo.sh/screenshots/multiple-choice.jpg) | Pick one from a list. Each option has a title and description so agents can give you full context. |
+| **Categorize** | ![Categorize](https://extendo.sh/screenshots/categorize.jpg) | Drag items into categories. Kanban-style triage — sort tickets into priority buckets from your phone. |
+| **Yes / No** | ![Yes / No](https://extendo.sh/screenshots/yes-no-merge.jpg) | Binary approval gates. PR stats, test results, reviews — all in the prompt. Tap and done. |
+| **Document Review** | ![Document Review](https://extendo.sh/screenshots/document-review.jpg) | Read and annotate specs, plans, or diffs right on your phone. Approve or send back with feedback. |
+| **Dark Mode** | ![Dark Mode](https://extendo.sh/screenshots/dark-mode-choice.jpg) | All artifact types support dark mode, following your system appearance settings. |
+
 ## License
 
 MIT
