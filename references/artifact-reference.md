@@ -49,7 +49,7 @@ Use `-b <name>` to target a specific backend (e.g., `-b claude`, `-b slack`). Wi
 
 ### yes_no
 
-**When to use:** Binary approval/rejection. Deploy permission, go/no-go, confirm destructive action.
+**When to use:** Binary yes/no decision. Deploy permission, go/no-go, confirm destructive action.
 
 **Required flags:** `--type yes_no`, `--title`, `--prompt`
 
@@ -67,7 +67,7 @@ Use `-b <name>` to target a specific backend (e.g., `-b claude`, `-b slack`). Wi
 {
   "payload": {
     "prompt": "CI is green. All 847 tests pass. Ready to deploy?",
-    "decision": true
+    "answer": true
   }
 }
 ```
@@ -144,15 +144,15 @@ The `selected` array at the payload level contains the IDs of chosen options.
 {
   "payload": {
     "items": [
-      { "id": "aws", "label": "AWS bill $12,400", "description": "Monthly infrastructure", "decision": "approved" },
-      { "id": "figma", "label": "Figma $480", "description": "Design tool subscription", "decision": "approved" },
-      { "id": "retreat", "label": "Team retreat $8,200", "description": "Offsite in March", "decision": "rejected", "comment": "Too expensive this quarter" }
+      { "id": "aws", "label": "AWS bill $12,400", "description": "Monthly infrastructure", "decision": true },
+      { "id": "figma", "label": "Figma $480", "description": "Design tool subscription", "decision": true },
+      { "id": "retreat", "label": "Team retreat $8,200", "description": "Offsite in March", "decision": false, "comment": "Too expensive this quarter" }
     ]
   }
 }
 ```
 
-Each item gets `decision` of `"approved"` or `"rejected"`, plus an optional `comment`.
+Each item gets `decision` of `true` (approved) or `false` (rejected), plus an optional `comment`.
 
 ---
 
@@ -389,7 +389,7 @@ RESULT=$(./scripts/extendo artifact create decisions deploy-v2 \
   --prompt "All tests pass. Deploy to production?" \
   --wait --json)
 
-APPROVED=$(echo "$RESULT" | jq -r '.payload.decision')
+APPROVED=$(echo "$RESULT" | jq -r '.payload.answer')
 if [ "$APPROVED" = "true" ]; then
   echo "Deploying..."
 else
@@ -495,7 +495,7 @@ Always use `--json` when you need to programmatically read the result. Here are 
 ### Yes/No
 ```bash
 RESULT=$(./scripts/extendo artifact get decisions deploy --json)
-echo "$RESULT" | jq -r '.payload.decision'          # true or false
+echo "$RESULT" | jq -r '.payload.answer'          # true or false
 ```
 
 ### Multiple Choice (single select)
@@ -516,9 +516,9 @@ RESULT=$(./scripts/extendo artifact get decisions expenses --json)
 # All items with their decisions
 echo "$RESULT" | jq '.payload.items[] | {id, decision, comment}'
 # Just approved items
-echo "$RESULT" | jq -r '.payload.items[] | select(.decision == "approved") | .id'
+echo "$RESULT" | jq -r '.payload.items[] | select(.decision == true) | .id'
 # Just rejected items with comments
-echo "$RESULT" | jq '.payload.items[] | select(.decision == "rejected") | {id, comment}'
+echo "$RESULT" | jq '.payload.items[] | select(.decision == false) | {id, comment}'
 ```
 
 ### Ranking

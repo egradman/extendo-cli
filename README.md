@@ -13,7 +13,7 @@ Extendo lets your agents ask humans for structured decisions — approvals, choi
 ```
 
 ```json
-{ "payload": { "decision": true } }
+{ "payload": { "answer": true } }
 ```
 
 No Slack threads. No email. No "reply YES to confirm." Purpose-built UI for each decision type.
@@ -54,11 +54,10 @@ With the public backend, your agent can create artifacts and push them to your p
 
 ### 4. Add the agent skill (optional)
 
-Extendo includes a skill file (`SKILL.md`) that teaches AI agents how to use the CLI. Clone this repo and add it as a skill in your agent framework:
+Extendo includes a skill file (`SKILL.md`) that teaches AI agents how to use the CLI. Install it with:
 
 ```bash
-git clone https://github.com/egradman/extendo-cli.git
-# Then add the skill directory to your agent's skill configuration
+npx skills add egradman/extendo-cli
 ```
 
 ## What can it do?
@@ -79,7 +78,7 @@ Create artifacts that render as purpose-built UI on the user's device. The agent
 
 | Type | What the user sees | Use case |
 |---|---|---|
-| `yes_no` | Approve / Reject buttons | Deploy gates, destructive action confirmation |
+| `yes_no` | Yes / No buttons | Deploy gates, destructive action confirmation |
 | `multiple_choice` | Radio buttons or checkboxes | Model selection, strategy choice |
 | `checklist` | Per-item approve/reject switches | Expense review, PR file-by-file approval |
 | `ranking` | Drag-to-reorder list | Sprint prioritization, migration ordering |
@@ -96,7 +95,7 @@ Block an agent workflow until a human decides:
 # Create a conversation thread for context
 THREAD=$(./scripts/extendo new ops "Requesting deploy approval for v2.3.1" --json | jq -r .endpoint.name)
 
-# Create a linked yes/no gate — blocks until the user taps Approve or Reject
+# Create a linked yes/no gate — blocks until the user taps Yes or No
 RESULT=$(./scripts/extendo artifact create ops deploy-v2 \
   --type yes_no \
   --title "Deploy v2.3.1 to production?" \
@@ -104,7 +103,7 @@ RESULT=$(./scripts/extendo artifact create ops deploy-v2 \
   --conversation "ops:$THREAD" \
   --wait --json)
 
-if [ "$(echo "$RESULT" | jq -r '.payload.decision')" = "true" ]; then
+if [ "$(echo "$RESULT" | jq -r '.payload.answer')" = "true" ]; then
   echo "Deploying..."
 else
   echo "Aborted."

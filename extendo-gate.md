@@ -65,7 +65,7 @@ RESULT=$(./scripts/extendo artifact create "$CATEGORY" "$GATE_NAME" \
   --conversation "$CATEGORY:$THREAD" \
   --wait --json)
 
-APPROVED=$(echo "$RESULT" | jq -r '.payload.decision')
+APPROVED=$(echo "$RESULT" | jq -r '.payload.answer')
 if [ "$APPROVED" = "true" ]; then
   # proceed
 else
@@ -109,9 +109,9 @@ RESULT=$(./scripts/extendo artifact create "$CATEGORY" "$GATE_NAME" \
   --wait --json)
 
 # Approved items
-echo "$RESULT" | jq -r '.payload.items[] | select(.decision == "approved") | .id'
+echo "$RESULT" | jq -r '.payload.items[] | select(.decision == true) | .id'
 # Rejected items with comments
-echo "$RESULT" | jq '.payload.items[] | select(.decision == "rejected") | {id, comment}'
+echo "$RESULT" | jq '.payload.items[] | select(.decision == false) | {id, comment}'
 ```
 
 ### Priority Gate (ranking)

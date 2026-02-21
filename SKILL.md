@@ -92,7 +92,7 @@ For the full artifact reference including all decision types, workflow patterns,
 
 | Type | When to Use | Key Flags |
 |---|---|---|
-| `yes_no` | Binary approval/rejection | `--prompt` |
+| `yes_no` | Yes / No decision | `--prompt` |
 | `multiple_choice` | Pick from options | `--option id:label[:desc]`, `--multi-select` |
 | `checklist` | Per-item approve/reject | `--item id:label[:desc]`, `--completion all_answered` |
 | `ranking` | Priority ordering | `--item id:label[:desc]` |
