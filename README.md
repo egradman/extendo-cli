@@ -1,5 +1,7 @@
 # Extendo CLI
 
+[![Demo](https://img.youtube.com/vi/X5Dv9fU7Lb8/maxresdefault.jpg)](https://youtu.be/X5Dv9fU7Lb8)
+
 **Human-in-the-loop decisions for AI agents.**
 
 Extendo lets your agents ask humans for structured decisions — approvals, choices, reviews, prioritization — delivered as rich UI via mobile push notifications. The human responds on their phone; the agent gets structured JSON back and continues.
